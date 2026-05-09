@@ -1,0 +1,9 @@
+{
+  "name": "Agro-Vision AI",
+  "description": "Asisten pertanian cerdas dengan deteksi penyakit AI, kalender tanam, ensiklopedia hama, manajemen laporan, dan profil petani terpersonalisasi.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ],
+  "majorCapabilities": []
+}
