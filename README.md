@@ -48,3 +48,14 @@ Pastikan Anda telah memiliki API Key dari Google Gemini AI.
    ```
 
 5. Buka `http://localhost:3000` di peramban Anda.
+
+## Deployment ke GitHub Pages
+
+Proyek ini telah dikonfigurasi untuk deploy otomatis ke GitHub Pages menggunakan GitHub Actions. Agar fitur AI tetap berfungsi setelah dideploy, Anda perlu menambahkan API Key ke dalam **GitHub Secrets**:
+
+1. Pergi ke repositori Anda di GitHub.
+2. Klik tab **Settings** > **Secrets and variables** > **Actions**.
+3. Klik **New repository secret**.
+4. Beri nama `GEMINI_API_KEY` dan masukkan key Anda (`AIzaSyB1Z1k3Mr9-p3Wjd3nA-jnVQX-SC1F_73E`) sebagai nilainya.
+5. Setiap kali Anda melakukan `git push` ke branch `main`, aplikasi akan secara otomatis dibangun dan dideploy.
+
