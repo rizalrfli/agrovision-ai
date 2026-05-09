@@ -12,7 +12,8 @@ import { PEST_DATABASE } from './data';
 // Initialize Gemini API
 const initializeGemini = () => {
   try {
-    return new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    const key = process.env.GEMINI_API_KEY || "AIzaSyB1Z1k3Mr9-p3Wjd3nA-jnVQX-SC1F_73E";
+    return new GoogleGenAI({ apiKey: key });
   } catch (error) {
     console.error("Failed to initialize Gemini:", error);
     return null;

@@ -9,7 +9,7 @@ export default defineConfig(({mode}) => {
     base: '/agrovision-ai/',
     plugins: [react(), tailwindcss()],
     define: {
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || process.env.GEMINI_API_KEY),
+      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || process.env.GEMINI_API_KEY || "AIzaSyB1Z1k3Mr9-p3Wjd3nA-jnVQX-SC1F_73E"),
     },
     resolve: {
       alias: {
