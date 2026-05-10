@@ -109,6 +109,8 @@ export default function App() {
   const [reportFilterType, setReportFilterType] = useState<string>('semua');
   const [reportStartDate, setReportStartDate] = useState<string>('');
   const [reportEndDate, setReportEndDate] = useState<string>('');
+  const [showSaveToast, setShowSaveToast] = useState(false);
+
 
   const [selectedReportItem, setSelectedReportItem] = useState<any | null>(null);
   const [selectedPest, setSelectedPest] = useState<any | null>(null);
@@ -336,6 +338,10 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
       }
     };
     setReportItems([...reportItems, newItem]);
+    
+    // Trigger notification
+    setShowSaveToast(true);
+    setTimeout(() => setShowSaveToast(false), 3000);
   };
 
   const removeItemFromReport = (id: number) => {
@@ -527,14 +533,15 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                     <p className="text-sm text-[#CCD5AE]">Hasil diagnosis gambar Anda</p>
                   </div>
                 </div>
-                <button
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
                   onClick={() => addToReport(result, 'diagnosis')}
                   className="p-2 bg-white/10 border border-white/20 rounded-xl text-[#E9EDC9] hover:bg-white/20 transition-all flex items-center gap-2 text-xs font-bold"
                   title="Simpan ke Laporan"
                 >
                   <Download className="w-4 h-4" />
                   <span className="hidden sm:inline">Simpan Laporan</span>
-                </button>
+                </motion.button>
               </div>
 
               {result.status === 'error_image' ? (
@@ -605,14 +612,15 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                     <p className="text-sm text-[#CCD5AE]">Jadwal perawatan untuk {result.tanaman}</p>
                   </div>
                 </div>
-                <button
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
                   onClick={() => addToReport(result, 'kalender')}
                   className="p-2 bg-white/10 border border-white/20 rounded-xl text-[#E9EDC9] hover:bg-white/20 transition-all flex items-center gap-2 text-xs font-bold"
                   title="Simpan ke Laporan"
                 >
                   <Download className="w-4 h-4" />
                   <span className="hidden sm:inline">Simpan Laporan</span>
-                </button>
+                </motion.button>
               </div>
               
               <div className="flex items-center justify-between">
@@ -649,14 +657,15 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                     <p className="text-sm text-[#CCD5AE]">Analisis dampak cuaca pada kebun Anda</p>
                   </div>
                 </div>
-                <button
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
                   onClick={() => addToReport(result, 'cuaca')}
                   className="p-2 bg-white/10 border border-white/20 rounded-xl text-[#E9EDC9] hover:bg-white/20 transition-all flex items-center gap-2 text-xs font-bold"
                   title="Simpan ke Laporan"
                 >
                   <Download className="w-4 h-4" />
                   <span className="hidden sm:inline">Simpan Laporan</span>
-                </button>
+                </motion.button>
               </div>
 
               <div className="flex items-center justify-between bg-white/5 p-4 rounded-xl border border-white/10">
@@ -1505,7 +1514,8 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                     </div>
                   )}
 
-                  <button
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => addToReport({
                       luas: landArea,
                       jenis: fertilizerType === 'kompos' ? 'Kompos Padat' : 'POC',
@@ -1515,7 +1525,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                     className="w-full py-3 sm:py-4 bg-[#E9EDC9] text-[#1B3022] font-bold rounded-2xl hover:bg-white transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95 min-h-[48px]"
                   >
                     <Download className="w-5 h-5" /> Simpan Laporan
-                  </button>
+                  </motion.button>
                 </div>
               </div>
             </div>
@@ -1680,13 +1690,14 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                              <span className="text-xs font-medium text-gray-300">Risiko:</span>
                              {getSeverityBadge(weatherAIAnalysis.tingkat_risiko || '')}
                           </div>
-                          <button
+                          <motion.button
+                            whileTap={{ scale: 0.95 }}
                             onClick={() => addToReport(weatherAIAnalysis, 'cuaca')}
                             className="w-full sm:w-auto p-2 bg-white/10 border border-white/20 rounded-xl text-[#E9EDC9] hover:bg-white/20 transition-all flex items-center justify-center gap-2 text-xs font-bold active:scale-95"
                           >
                             <Download className="w-4 h-4" />
                             Simpan Laporan
-                          </button>
+                          </motion.button>
                         </div>
 
                       <div className="space-y-3">
@@ -2135,6 +2146,39 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
           </motion.div>
         )}
       </main>
+
+      {/* Premium Toast Notification */}
+      <AnimatePresence>
+        {showSaveToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[200] w-[min(90vw,400px)]"
+          >
+            <div className="bg-[#1B3022]/90 backdrop-blur-2xl border border-green-500/30 rounded-2xl p-4 shadow-[0_20px_50px_rgba(0,0,0,0.5),0_0_20px_rgba(34,197,94,0.2)] flex items-center gap-4">
+              <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center border border-green-500/40 shrink-0">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 15, delay: 0.1 }}
+                >
+                  <CheckCircle className="w-6 h-6 text-green-400" />
+                </motion.div>
+              </div>
+              <div className="flex-1">
+                <h4 className="text-[#E9EDC9] font-bold text-sm">Laporan Tersimpan!</h4>
+                <p className="text-gray-400 text-[11px] leading-tight">Berhasil ditambahkan ke menu Laporan Saya.</p>
+              </div>
+              <motion.div 
+                className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,1)]"
+                animate={{ opacity: [0.4, 1, 0.4] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
