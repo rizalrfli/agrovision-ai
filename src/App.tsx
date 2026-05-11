@@ -13,9 +13,11 @@ import { PEST_DATABASE } from './data';
 // Initialize Gemini API
 const initializeGemini = () => {
   try {
-    const key = process.env.VITE_GEMINI_API_KEY;
+    // UBAH BARIS INI: Gunakan import.meta.env.VITE_
+    const key = import.meta.env.VITE_GEMINI_API_KEY;
+
     if (!key) {
-      console.error("GEMINI_API_KEY is missing! Please add it to your .env file or GitHub Secrets.");
+      console.error("VITE_GEMINI_API_KEY is missing! Please add it to your GitHub Secrets.");
       return null;
     }
     return new GoogleGenAI({ apiKey: key });
