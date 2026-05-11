@@ -1,8 +1,9 @@
 import React, { useState, useRef, ChangeEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { GoogleGenAI } from '@google/genai';
-import { Upload, Send, Leaf, CloudRain, CalendarDays, 
-  AlertTriangle, CheckCircle, Info, ShieldAlert, 
+import {
+  Upload, Send, Leaf, CloudRain, CalendarDays,
+  AlertTriangle, CheckCircle, Info, ShieldAlert,
   X, Image as ImageIcon, Loader2, ThermometerSun, BookOpen, Calculator, Scale, Droplets, Menu, Download, Trash2, FileText, Settings, Bell, BellOff, Wind, MoreVertical, User, Sparkles, ArrowLeft
 } from 'lucide-react';
 import jsPDF from 'jspdf';
@@ -12,7 +13,7 @@ import { PEST_DATABASE } from './data';
 // Initialize Gemini API
 const initializeGemini = () => {
   try {
-    const key = process.env.GEMINI_API_KEY;
+    const key = process.env.VITE_GEMINI_API_KEY;
     if (!key) {
       console.error("GEMINI_API_KEY is missing! Please add it to your .env file or GitHub Secrets.");
       return null;
@@ -90,7 +91,7 @@ export default function App() {
     const saved = localStorage.getItem('agro_notifications_enabled');
     return saved !== null ? JSON.parse(saved) : true;
   });
-  const [activeAlerts, setActiveAlerts] = useState<{id: string, title: string, message: string, type: 'danger' | 'warning'}[]>([]);
+  const [activeAlerts, setActiveAlerts] = useState<{ id: string, title: string, message: string, type: 'danger' | 'warning' }[]>([]);
   const [inputText, setInputText] = useState('');
   const [image, setImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -98,7 +99,7 @@ export default function App() {
   const [error, setError] = useState('');
   const [landArea, setLandArea] = useState<number | ''>(1000);
   const [fertilizerType, setFertilizerType] = useState<'kompos' | 'poc'>('kompos');
-  
+
   // Weather states
   const [weatherData, setWeatherData] = useState<any>(null);
   const [weatherLocation, setWeatherLocation] = useState<string>('');
@@ -200,7 +201,7 @@ export default function App() {
       setError('');
     };
     reader.readAsDataURL(file);
-    
+
     // Reset input so the same file can be selected again if needed
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -214,7 +215,7 @@ export default function App() {
     setWeatherError('');
     setWeatherData(null);
     setWeatherAIAnalysis(null);
-    
+
     if (!navigator.geolocation) {
       setWeatherError('Geolocation is not supported by your browser');
       setIsWeatherLoading(false);
@@ -224,7 +225,7 @@ export default function App() {
     navigator.geolocation.getCurrentPosition(async (position) => {
       try {
         const { latitude, longitude } = position.coords;
-        
+
         // Fetch location name
         const locResponse = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=id`);
         const locData = await locResponse.json();
@@ -233,7 +234,7 @@ export default function App() {
         // Fetch weather data from Open-Meteo
         const weatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode&timezone=auto`);
         const data = await weatherResponse.json();
-        
+
         setWeatherData(data);
         setIsWeatherLoading(false);
       } catch (err) {
@@ -290,7 +291,7 @@ export default function App() {
     setIsWeatherAILoading(true);
     setWeatherError('');
     setWeatherAIAnalysis(null);
-    
+
     try {
       if (!ai) {
         throw new Error('API Key Gemini belum diset.');
@@ -342,7 +343,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
       }
     };
     setReportItems([...reportItems, newItem]);
-    
+
     // Trigger notification
     setShowSaveToast(true);
     setTimeout(() => setShowSaveToast(false), 3000);
@@ -360,7 +361,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
     doc.setFontSize(20);
     doc.setTextColor(27, 48, 34); // #1B3022
     doc.text(title, 14, 22);
-    
+
     doc.setFontSize(10);
     doc.setTextColor(100);
     doc.text(`Dicetak pada: ${date}`, 14, 30);
@@ -380,7 +381,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
 
       doc.setFontSize(10);
       doc.setTextColor(0);
-      
+
       const content = [];
       if (item.type === 'diagnosis') {
         content.push(["Diagnosis", item.data.diagnosis]);
@@ -432,7 +433,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
       } else if (item.type === 'cuaca') {
         detail = `Risiko: ${item.data.tingkat_risiko}, Analisis: ${item.data.analisis_singkat}`;
       }
-      
+
       const row = `${item.id},"${item.timestamp}",${item.type},"${detail.replace(/"/g, '""')}"`;
       csvContent += row + "\n";
     });
@@ -463,7 +464,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
 
     try {
       const contents: any[] = [];
-      
+
       if (image) {
         const base64Data = image.split(',')[1];
         const mimeType = image.match(/data:(.*?);/)?.[1] || 'image/jpeg';
@@ -471,7 +472,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
           inlineData: { data: base64Data, mimeType }
         });
       }
-      
+
       if (inputText.trim()) {
         const profileContext = farmerProfile.name ? `\n(KONTEKS PENGGUNA - Nama: ${farmerProfile.name}, Lokasi: ${farmerProfile.farmLocation}, Luas: ${farmerProfile.farmSize}m2, Metode: ${farmerProfile.farmingMethod}, Tanaman Utama: ${farmerProfile.mainCrops.join(', ')})` : '';
         contents.push(inputText + profileContext);
@@ -518,7 +519,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
     if (!result) return null;
 
     return (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-3xl mx-auto mt-6 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl overflow-hidden shadow-2xl"
@@ -587,15 +588,15 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                         Pencegahan
                       </h4>
                       <p className="text-sm text-gray-400 pl-6">{result.pencegahan}</p>
-                      
+
                       {result.solusi_kimiawi_opsional && (
-                         <div className="mt-4 pt-4 border-t border-white/10">
-                            <h4 className="text-xs font-bold uppercase text-red-400 tracking-widest flex items-center gap-2 mb-2">
-                              <ShieldAlert className="w-4 h-4" />
-                              Tindakan Kimiawi
-                            </h4>
-                            <p className="text-sm text-gray-400 pl-6 italic">{result.solusi_kimiawi_opsional}</p>
-                         </div>
+                        <div className="mt-4 pt-4 border-t border-white/10">
+                          <h4 className="text-xs font-bold uppercase text-red-400 tracking-widest flex items-center gap-2 mb-2">
+                            <ShieldAlert className="w-4 h-4" />
+                            Tindakan Kimiawi
+                          </h4>
+                          <p className="text-sm text-gray-400 pl-6 italic">{result.solusi_kimiawi_opsional}</p>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -626,7 +627,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                   <span className="hidden sm:inline">Simpan Laporan</span>
                 </motion.button>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-[#CCD5AE] bg-white/10 px-4 py-2 rounded-full font-medium border border-white/20 text-sm">
                   <Info className="w-4 h-4" />
@@ -641,7 +642,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                     <h3 className="font-bold text-[#E9EDC9]">Hari ke-{j.hari_ke}</h3>
                     <p className="text-sm font-bold uppercase tracking-widest text-[#A3B18A] mt-1">{j.kategori_tugas}</p>
                     <p className="text-sm text-gray-300 bg-white/5 p-3 rounded-lg border border-white/10 inline-block mt-2">
-                       {j.deskripsi_tugas}
+                      {j.deskripsi_tugas}
                     </p>
                   </div>
                 ))}
@@ -717,7 +718,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
         {/* Extreme Weather Notification Banner */}
         <AnimatePresence>
           {activeAlerts.length > 0 && isNotificationsEnabled && (
-            <motion.div 
+            <motion.div
               initial={{ height: 0 }}
               animate={{ height: 'auto' }}
               exit={{ height: 0 }}
@@ -735,13 +736,13 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                     </div>
                   </div>
                   <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-                    <button 
+                    <button
                       onClick={() => setView('cuaca')}
                       className="px-2 sm:px-3 py-1 sm:py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-[9px] sm:text-[10px] font-bold text-white transition-all uppercase tracking-wider whitespace-nowrap active:scale-95"
                     >
                       Cek Detail
                     </button>
-                    <button 
+                    <button
                       onClick={() => setActiveAlerts(prev => prev.slice(1))}
                       className="p-1 hover:bg-white/10 rounded-full text-white/60 transition-all active:scale-95 shrink-0"
                     >
@@ -763,7 +764,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
               <p className="text-[10px] sm:text-xs text-[#A3B18A] font-medium hidden sm:block truncate">Sistem Manajemen Pertanian Berkelanjutan</p>
             </div>
           </div>
-          
+
           {/* Unified Navigation (Three Dots Menu) */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Quick Access or Label (Optional, keeping it clean for now) */}
@@ -771,8 +772,8 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
               <p className="text-[10px] font-bold uppercase tracking-widest text-[#A3B18A] leading-none mb-1">Navigasi</p>
               <p className="text-[9px] text-gray-500 font-mono">{view.toUpperCase()}</p>
             </div>
-            
-            <button 
+
+            <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="p-1.5 sm:p-2 bg-white/10 border border-white/20 rounded-xl text-[#E9EDC9] hover:bg-white/20 transition-all shadow-lg active:scale-95"
             >
@@ -786,7 +787,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
           {isMenuOpen && (
             <>
               {/* Click outside to close backdrop */}
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -815,16 +816,14 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                         setView(item.id as any);
                         setIsMenuOpen(false);
                       }}
-                      className={`group p-4 rounded-3xl text-left transition-all border ${
-                        view === item.id 
-                          ? 'bg-[#E9EDC9] text-[#1B3022] border-[#E9EDC9] shadow-[0_0_20px_rgba(233,237,201,0.3)]' 
-                          : 'bg-white/5 text-gray-400 border-white/10 hover:bg-white/10 hover:border-white/20'
-                      }`}
+                      className={`group p-4 rounded-3xl text-left transition-all border ${view === item.id
+                        ? 'bg-[#E9EDC9] text-[#1B3022] border-[#E9EDC9] shadow-[0_0_20px_rgba(233,237,201,0.3)]'
+                        : 'bg-white/5 text-gray-400 border-white/10 hover:bg-white/10 hover:border-white/20'
+                        }`}
                     >
                       <div className="flex items-center gap-4">
-                        <div className={`p-2.5 rounded-2xl ${
-                          view === item.id ? 'bg-[#1B3022] text-[#E9EDC9]' : 'bg-white/10 text-[#A3B18A] group-hover:bg-white/20'
-                        }`}>
+                        <div className={`p-2.5 rounded-2xl ${view === item.id ? 'bg-[#1B3022] text-[#E9EDC9]' : 'bg-white/10 text-[#A3B18A] group-hover:bg-white/20'
+                          }`}>
                           <item.icon className="w-5 h-5" />
                         </div>
                         <div>
@@ -843,7 +842,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
 
       <main className="max-w-6xl mx-auto px-4 mt-6 sm:mt-8 space-y-6 sm:space-y-8">
         {view === 'profil' && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="space-y-6 sm:space-y-8"
@@ -864,7 +863,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                   </div>
                   <h3 className="text-xl font-bold text-[#E9EDC9]">{farmerProfile.name || 'Petani Hebat'}</h3>
                   <p className="text-sm text-[#A3B18A] mb-6">{farmerProfile.farmName || 'Lahan Pertanian'}</p>
-                  
+
                   <div className="space-y-3 text-left">
                     <div className="flex items-center gap-3 text-xs text-gray-400 bg-white/5 p-3 rounded-xl border border-white/10">
                       <Scale className="w-4 h-4 text-[#A3B18A]" />
@@ -889,59 +888,59 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-[#A3B18A] ml-1">Nama Lengkap</label>
-                    <input 
+                    <input
                       type="text"
                       value={farmerProfile.name}
-                      onChange={(e) => setFarmerProfile({...farmerProfile, name: e.target.value})}
+                      onChange={(e) => setFarmerProfile({ ...farmerProfile, name: e.target.value })}
                       placeholder="Nama Anda"
                       className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 text-[#F4F1DE] outline-none focus:ring-2 focus:ring-[#E9EDC9]/30 transition-all"
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-[#A3B18A] ml-1">Nama Lahan / Kelompok</label>
-                    <input 
+                    <input
                       type="text"
                       value={farmerProfile.farmName}
-                      onChange={(e) => setFarmerProfile({...farmerProfile, farmName: e.target.value})}
+                      onChange={(e) => setFarmerProfile({ ...farmerProfile, farmName: e.target.value })}
                       placeholder="Maju Bersama"
                       className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 text-[#F4F1DE] outline-none focus:ring-2 focus:ring-[#E9EDC9]/30 transition-all"
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-[#A3B18A] ml-1">Lokasi Lahan</label>
-                    <input 
+                    <input
                       type="text"
                       value={farmerProfile.farmLocation}
-                      onChange={(e) => setFarmerProfile({...farmerProfile, farmLocation: e.target.value})}
+                      onChange={(e) => setFarmerProfile({ ...farmerProfile, farmLocation: e.target.value })}
                       placeholder="Desa, Kecamatan, Kota"
                       className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 text-[#F4F1DE] outline-none focus:ring-2 focus:ring-[#E9EDC9]/30 transition-all"
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-[#A3B18A] ml-1">Luas Lahan (m²)</label>
-                    <input 
+                    <input
                       type="number"
                       value={farmerProfile.farmSize}
-                      onChange={(e) => setFarmerProfile({...farmerProfile, farmSize: e.target.value})}
+                      onChange={(e) => setFarmerProfile({ ...farmerProfile, farmSize: e.target.value })}
                       placeholder="1000"
                       className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 text-[#F4F1DE] outline-none focus:ring-2 focus:ring-[#E9EDC9]/30 transition-all"
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-[#A3B18A] ml-1">Pengalaman Bertani (Tahun)</label>
-                    <input 
+                    <input
                       type="number"
                       value={farmerProfile.experienceYears}
-                      onChange={(e) => setFarmerProfile({...farmerProfile, experienceYears: e.target.value})}
+                      onChange={(e) => setFarmerProfile({ ...farmerProfile, experienceYears: e.target.value })}
                       placeholder="5"
                       className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 text-[#F4F1DE] outline-none focus:ring-2 focus:ring-[#E9EDC9]/30 transition-all"
                     />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-bold uppercase tracking-widest text-[#A3B18A] ml-1">Metode Bertani Utama</label>
-                    <select 
+                    <select
                       value={farmerProfile.farmingMethod}
-                      onChange={(e) => setFarmerProfile({...farmerProfile, farmingMethod: e.target.value})}
+                      onChange={(e) => setFarmerProfile({ ...farmerProfile, farmingMethod: e.target.value })}
                       className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 text-[#F4F1DE] outline-none focus:ring-2 focus:ring-[#E9EDC9]/30 transition-all appearance-none"
                     >
                       <option value="Organik">Sepenuhnya Organik</option>
@@ -961,16 +960,15 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                         onClick={() => {
                           const crops = [...farmerProfile.mainCrops];
                           if (crops.includes(crop)) {
-                            setFarmerProfile({...farmerProfile, mainCrops: crops.filter(c => c !== crop)});
+                            setFarmerProfile({ ...farmerProfile, mainCrops: crops.filter(c => c !== crop) });
                           } else {
-                            setFarmerProfile({...farmerProfile, mainCrops: [...crops, crop]});
+                            setFarmerProfile({ ...farmerProfile, mainCrops: [...crops, crop] });
                           }
                         }}
-                        className={`px-4 sm:px-6 py-2 rounded-full text-[10px] sm:text-xs font-bold transition-all border shrink-0 ${
-                          farmerProfile.mainCrops.includes(crop)
-                            ? 'bg-[#E9EDC9] text-[#1B3022] border-[#E9EDC9]'
-                            : 'bg-white/5 text-gray-400 border-white/10 hover:border-white/30 hover:bg-white/10'
-                        }`}
+                        className={`px-4 sm:px-6 py-2 rounded-full text-[10px] sm:text-xs font-bold transition-all border shrink-0 ${farmerProfile.mainCrops.includes(crop)
+                          ? 'bg-[#E9EDC9] text-[#1B3022] border-[#E9EDC9]'
+                          : 'bg-white/5 text-gray-400 border-white/10 hover:border-white/30 hover:bg-white/10'
+                          }`}
                       >
                         {crop}
                       </button>
@@ -980,20 +978,20 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                 </div>
 
                 <div className="pt-6 border-t border-white/10">
-                   <div className="flex items-center gap-4 bg-[#E9EDC9]/10 p-5 rounded-2xl border border-[#E9EDC9]/20">
-                      <CheckCircle className="w-8 h-8 text-[#A3B18A]" />
-                      <div>
-                        <h4 className="font-bold text-[#E9EDC9]">Data Otomatis Tersimpan</h4>
-                        <p className="text-xs text-gray-400">Setiap perubahan yang Anda buat akan langsung disimpan ke memori penyimpanan aplikasi.</p>
-                      </div>
-                   </div>
+                  <div className="flex items-center gap-4 bg-[#E9EDC9]/10 p-5 rounded-2xl border border-[#E9EDC9]/20">
+                    <CheckCircle className="w-8 h-8 text-[#A3B18A]" />
+                    <div>
+                      <h4 className="font-bold text-[#E9EDC9]">Data Otomatis Tersimpan</h4>
+                      <p className="text-xs text-gray-400">Setiap perubahan yang Anda buat akan langsung disimpan ke memori penyimpanan aplikasi.</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </motion.div>
         )}
         {view === 'pengaturan' && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6 sm:space-y-8"
@@ -1018,14 +1016,12 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                 </div>
                 <button
                   onClick={() => setIsNotificationsEnabled(!isNotificationsEnabled)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#E9EDC9] focus:ring-offset-2 focus:ring-offset-[#1B3022] ${
-                    isNotificationsEnabled ? 'bg-green-500' : 'bg-gray-600'
-                  }`}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#E9EDC9] focus:ring-offset-2 focus:ring-offset-[#1B3022] ${isNotificationsEnabled ? 'bg-green-500' : 'bg-gray-600'
+                    }`}
                 >
                   <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      isNotificationsEnabled ? 'translate-x-6' : 'translate-x-1'
-                    }`}
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isNotificationsEnabled ? 'translate-x-6' : 'translate-x-1'
+                      }`}
                   />
                 </button>
               </div>
@@ -1067,17 +1063,17 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                       placeholder="Contoh: 'Tiba-tiba banyak bercak hitam di daun cabai saya' atau 'Kapan waktu terbaik memupuk jagung umur 20 hari?'"
                       className="w-full bg-transparent border-none resize-none focus:ring-0 text-[#F4F1DE] placeholder:text-gray-400/80 min-h-[100px] text-lg outline-none"
                     />
-                    
+
                     <AnimatePresence>
                       {image && (
-                        <motion.div 
+                        <motion.div
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.9 }}
                           className="relative inline-block mt-4 rounded-xl overflow-hidden shadow-sm border border-white/20"
                         >
                           <img src={image} alt="Preview Daun" className="h-32 object-cover" />
-                          <button 
+                          <button
                             onClick={removeImage}
                             className="absolute top-2 right-2 bg-black/50 text-white p-1.5 rounded-full hover:bg-black/70 backdrop-blur-sm transition-colors"
                           >
@@ -1090,14 +1086,14 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
 
                   <div className="flex items-center justify-between mt-4 px-2">
                     <div className="flex gap-2">
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        className="hidden" 
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
                         ref={fileInputRef}
                         onChange={handleImageUpload}
                       />
-                      <button 
+                      <button
                         onClick={() => fileInputRef.current?.click()}
                         className="flex items-center gap-2 px-5 py-2 text-sm font-bold text-[#A3B18A] bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-colors"
                       >
@@ -1106,7 +1102,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                       </button>
                     </div>
 
-                    <button 
+                    <button
                       onClick={handleSubmit}
                       disabled={isLoading || (!inputText.trim() && !image)}
                       className="flex items-center gap-2 px-8 py-3 text-sm font-bold text-[#1B3022] bg-[#E9EDC9] hover:bg-white disabled:bg-white/10 disabled:text-white/30 rounded-full transition-all shadow-lg hover:shadow-xl hover:scale-105 disabled:hover:scale-100 disabled:shadow-none"
@@ -1137,7 +1133,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
 
             {/* Loading Indicator */}
             {isLoading && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="w-full max-w-3xl mx-auto mt-6 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-10 sm:p-14 shadow-2xl flex flex-col items-center justify-center space-y-8"
@@ -1156,7 +1152,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                     }}
                     className="absolute inset-0 bg-[#E9EDC9]/30 rounded-full blur-xl"
                   />
-                  
+
                   {/* Dots / Nucleus */}
                   <div className="relative flex gap-2.5">
                     {[0, 1, 2].map((i) => (
@@ -1176,30 +1172,30 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                       />
                     ))}
                   </div>
-                  
+
                   {/* Outer spinning ring indicator logic */}
-                  <motion.svg 
+                  <motion.svg
                     animate={{ rotate: 360 }}
                     transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                    className="absolute inset-0 w-full h-full text-[#E9EDC9]/40 drop-shadow-[0_0_8px_rgba(233,237,201,0.5)]" 
+                    className="absolute inset-0 w-full h-full text-[#E9EDC9]/40 drop-shadow-[0_0_8px_rgba(233,237,201,0.5)]"
                     viewBox="0 0 100 100"
                   >
                     <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="60 40" />
                     <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="30 20" className="opacity-50" />
                   </motion.svg>
 
-                  <motion.svg 
+                  <motion.svg
                     animate={{ rotate: -360 }}
                     transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-                    className="absolute inset-2 w-[calc(100%-16px)] h-[calc(100%-16px)] text-green-400/30" 
+                    className="absolute inset-2 w-[calc(100%-16px)] h-[calc(100%-16px)] text-green-400/30"
                     viewBox="0 0 100 100"
                   >
                     <circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="15 30" />
                   </motion.svg>
                 </div>
-                
+
                 <div className="space-y-3 text-center">
-                  <motion.div 
+                  <motion.div
                     animate={{ opacity: [0.6, 1, 0.6] }}
                     transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                     className="flex items-center gap-2 justify-center"
@@ -1220,7 +1216,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
             {/* Result Area */}
             {!isLoading && result && (
               <div className="w-full max-w-3xl mx-auto mt-6 mb-4 flex justify-between items-center px-2">
-                <button 
+                <button
                   onClick={() => {
                     setResult(null);
                     setInputText('');
@@ -1238,7 +1234,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
         )}
 
         {view === 'database' && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="space-y-6 sm:space-y-8"
@@ -1262,7 +1258,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                 />
                 <BookOpen className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A3B18A]" />
                 {searchPest && (
-                  <button 
+                  <button
                     onClick={() => setSearchPest('')}
                     className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
                   >
@@ -1273,21 +1269,21 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-              {PEST_DATABASE.filter(pest => 
-                pest.commonName.toLowerCase().includes(searchPest.toLowerCase()) || 
+              {PEST_DATABASE.filter(pest =>
+                pest.commonName.toLowerCase().includes(searchPest.toLowerCase()) ||
                 pest.scientificName.toLowerCase().includes(searchPest.toLowerCase())
               ).map((pest) => (
-                <motion.div 
+                <motion.div
                   layout
                   whileHover={{ y: -5 }}
                   onClick={() => setSelectedPest(pest)}
-                  key={pest.id} 
+                  key={pest.id}
                   className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2rem] sm:rounded-3xl overflow-hidden flex flex-col shadow-2xl group hover:border-white/40 transition-all cursor-pointer"
                 >
                   <div className="relative h-48 sm:h-56 overflow-hidden">
-                    <img 
-                      src={pest.image} 
-                      alt={pest.commonName} 
+                    <img
+                      src={pest.image}
+                      alt={pest.commonName}
                       referrerPolicy="no-referrer"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     />
@@ -1299,42 +1295,42 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                   </div>
                   <div className="p-5 sm:p-6 space-y-4 sm:space-y-6 flex-1 flex flex-col">
                     <div className="space-y-2">
-                       <h4 className="text-[10px] sm:text-xs font-bold uppercase text-[#D4A373] tracking-widest flex items-center gap-2">
-                         <AlertTriangle className="w-3.5 h-3.5" />
-                         Gejala Serangan
-                       </h4>
-                       <p className="text-xs sm:text-sm text-gray-300 leading-relaxed pl-5 sm:pl-6 line-clamp-3 font-medium">{pest.symptoms}</p>
+                      <h4 className="text-[10px] sm:text-xs font-bold uppercase text-[#D4A373] tracking-widest flex items-center gap-2">
+                        <AlertTriangle className="w-3.5 h-3.5" />
+                        Gejala Serangan
+                      </h4>
+                      <p className="text-xs sm:text-sm text-gray-300 leading-relaxed pl-5 sm:pl-6 line-clamp-3 font-medium">{pest.symptoms}</p>
                     </div>
                   </div>
                   <div className="px-5 sm:px-6 pb-5 sm:pb-6 mt-auto">
                     <button className="w-full py-2.5 sm:py-3 bg-white/5 border border-white/10 rounded-2xl text-[10px] sm:text-xs font-bold text-[#E9EDC9] group-hover:bg-[#E9EDC9] group-hover:text-[#1B3022] transition-all flex items-center justify-center gap-2">
-                       Detail Selengkapnya <Info className="w-4 h-4" />
+                      Detail Selengkapnya <Info className="w-4 h-4" />
                     </button>
                   </div>
                 </motion.div>
               ))}
-              {PEST_DATABASE.filter(pest => 
-                pest.commonName.toLowerCase().includes(searchPest.toLowerCase()) || 
+              {PEST_DATABASE.filter(pest =>
+                pest.commonName.toLowerCase().includes(searchPest.toLowerCase()) ||
                 pest.scientificName.toLowerCase().includes(searchPest.toLowerCase())
               ).length === 0 && (
-                <div className="col-span-full py-20 text-center bg-white/5 border border-white/10 border-dashed rounded-3xl">
-                   <AlertTriangle className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                   <p className="text-gray-400 font-bold">Tidak ada data ditemukan untuk "{searchPest}"</p>
-                   <button 
-                     onClick={() => setSearchPest('')}
-                     className="mt-4 text-[#E9EDC9] hover:underline transition-all text-sm font-bold"
-                   >
-                     Reset Pencarian
-                   </button>
-                </div>
-              )}
+                  <div className="col-span-full py-20 text-center bg-white/5 border border-white/10 border-dashed rounded-3xl">
+                    <AlertTriangle className="w-12 h-12 text-gray-600 mx-auto mb-4" />
+                    <p className="text-gray-400 font-bold">Tidak ada data ditemukan untuk "{searchPest}"</p>
+                    <button
+                      onClick={() => setSearchPest('')}
+                      className="mt-4 text-[#E9EDC9] hover:underline transition-all text-sm font-bold"
+                    >
+                      Reset Pencarian
+                    </button>
+                  </div>
+                )}
             </div>
 
             {/* Pest Detail Modal */}
             <AnimatePresence>
               {selectedPest && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -1348,13 +1344,13 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                     className="relative w-full max-w-2xl bg-[#1B3022] border border-white/20 rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]"
                   >
                     <div className="relative h-48 sm:h-64 shrink-0">
-                       <img 
-                         src={selectedPest.image} 
-                         alt={selectedPest.commonName} 
-                         className="w-full h-full object-cover"
-                       />
-                       <div className="absolute inset-0 bg-gradient-to-t from-[#1B3022] via-[#1B3022]/40 to-transparent"></div>
-                       <button 
+                      <img
+                        src={selectedPest.image}
+                        alt={selectedPest.commonName}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#1B3022] via-[#1B3022]/40 to-transparent"></div>
+                      <button
                         onClick={() => setSelectedPest(null)}
                         className="absolute top-4 sm:top-6 right-4 sm:right-6 p-2 bg-black/40 hover:bg-red-500/60 rounded-xl text-white transition-all backdrop-blur-md border border-white/10"
                       >
@@ -1368,55 +1364,55 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                     </div>
 
                     <div className="p-5 sm:p-8 overflow-y-auto custom-scrollbar flex-1 space-y-6 sm:space-y-8">
-                       <div className="space-y-3 sm:space-y-4">
-                         <h4 className="text-[10px] sm:text-xs font-bold uppercase text-[#D4A373] tracking-[0.2em] flex items-center gap-2">
-                           <AlertTriangle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                           Gejala & Tanda
-                         </h4>
-                         <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 text-sm sm:text-base text-gray-300 leading-relaxed italic">
-                           {selectedPest.symptoms}
-                         </div>
-                       </div>
+                      <div className="space-y-3 sm:space-y-4">
+                        <h4 className="text-[10px] sm:text-xs font-bold uppercase text-[#D4A373] tracking-[0.2em] flex items-center gap-2">
+                          <AlertTriangle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                          Gejala & Tanda
+                        </h4>
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 text-sm sm:text-base text-gray-300 leading-relaxed italic">
+                          {selectedPest.symptoms}
+                        </div>
+                      </div>
 
-                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                         <div className="space-y-3 sm:space-y-4">
-                           <h4 className="text-[10px] sm:text-xs font-bold uppercase text-[#A3B18A] tracking-[0.2em] flex items-center gap-2">
-                             <Info className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                             Siklus Hidup
-                           </h4>
-                           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 text-xs sm:text-sm text-gray-400 leading-relaxed">
-                             {selectedPest.lifeCycle}
-                           </div>
-                         </div>
-                         <div className="space-y-3 sm:space-y-4">
-                           <h4 className="text-[10px] sm:text-xs font-bold uppercase text-green-400 tracking-[0.2em] flex items-center gap-2">
-                             <ShieldAlert className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                             Pengendalian
-                           </h4>
-                           <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 text-xs sm:text-sm text-gray-300 leading-relaxed">
-                              Gunakan Deteksi AI untuk langkah spesifik stadium tanaman.
-                           </div>
-                         </div>
-                       </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                        <div className="space-y-3 sm:space-y-4">
+                          <h4 className="text-[10px] sm:text-xs font-bold uppercase text-[#A3B18A] tracking-[0.2em] flex items-center gap-2">
+                            <Info className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            Siklus Hidup
+                          </h4>
+                          <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 text-xs sm:text-sm text-gray-400 leading-relaxed">
+                            {selectedPest.lifeCycle}
+                          </div>
+                        </div>
+                        <div className="space-y-3 sm:space-y-4">
+                          <h4 className="text-[10px] sm:text-xs font-bold uppercase text-green-400 tracking-[0.2em] flex items-center gap-2">
+                            <ShieldAlert className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            Pengendalian
+                          </h4>
+                          <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 text-xs sm:text-sm text-gray-300 leading-relaxed">
+                            Gunakan Deteksi AI untuk langkah spesifik stadium tanaman.
+                          </div>
+                        </div>
+                      </div>
 
-                       <div className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-4 sm:p-6 flex gap-3 sm:gap-4 items-start">
-                         <div className="p-2.5 sm:p-3 bg-orange-500/20 rounded-xl text-orange-400 shrink-0">
-                           <ShieldAlert className="w-5 h-5 sm:w-6 sm:h-6" />
-                         </div>
-                         <div>
-                            <h5 className="font-bold text-[#E9EDC9] mb-0.5 sm:mb-1 text-sm sm:text-base">Peringatan Tindakan</h5>
-                            <p className="text-[10px] sm:text-xs text-gray-400 leading-relaxed">Prioritaskan organik (Mimba, Gadung) sebelum kimiawi.</p>
-                         </div>
-                       </div>
+                      <div className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-4 sm:p-6 flex gap-3 sm:gap-4 items-start">
+                        <div className="p-2.5 sm:p-3 bg-orange-500/20 rounded-xl text-orange-400 shrink-0">
+                          <ShieldAlert className="w-5 h-5 sm:w-6 sm:h-6" />
+                        </div>
+                        <div>
+                          <h5 className="font-bold text-[#E9EDC9] mb-0.5 sm:mb-1 text-sm sm:text-base">Peringatan Tindakan</h5>
+                          <p className="text-[10px] sm:text-xs text-gray-400 leading-relaxed">Prioritaskan organik (Mimba, Gadung) sebelum kimiawi.</p>
+                        </div>
+                      </div>
                     </div>
 
                     <div className="p-5 sm:p-8 border-t border-white/10 bg-black/20">
-                       <button
-                         onClick={() => setSelectedPest(null)}
-                         className="w-full py-3.5 sm:py-4 bg-[#E9EDC9] text-[#1B3022] rounded-2xl font-bold hover:bg-white transition-all shadow-xl active:scale-95"
-                       >
-                         Tutup Detail
-                       </button>
+                      <button
+                        onClick={() => setSelectedPest(null)}
+                        className="w-full py-3.5 sm:py-4 bg-[#E9EDC9] text-[#1B3022] rounded-2xl font-bold hover:bg-white transition-all shadow-xl active:scale-95"
+                      >
+                        Tutup Detail
+                      </button>
                     </div>
                   </motion.div>
                 </div>
@@ -1426,7 +1422,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
         )}
 
         {view === 'kalkulator' && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="space-y-6 sm:space-y-8"
@@ -1445,8 +1441,8 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                     <label className="text-[10px] font-bold uppercase tracking-widest text-[#A3B18A] block ml-1">
                       Luas Lahan (m²)
                     </label>
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       value={landArea}
                       onChange={(e) => setLandArea(e.target.value ? Number(e.target.value) : '')}
                       placeholder="Contoh: 1000"
@@ -1461,22 +1457,20 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                     <div className="grid grid-cols-2 gap-3">
                       <button
                         onClick={() => setFertilizerType('kompos')}
-                        className={`py-3 px-4 rounded-2xl flex flex-col items-center gap-2 transition-all border active:scale-95 ${
-                          fertilizerType === 'kompos'
-                            ? 'bg-[#E9EDC9] text-[#1B3022] border-[#E9EDC9] shadow-lg'
-                            : 'bg-white/5 text-gray-400 hover:text-[#CCD5AE] border-white/10 hover:bg-white/10'
-                        }`}
+                        className={`py-3 px-4 rounded-2xl flex flex-col items-center gap-2 transition-all border active:scale-95 ${fertilizerType === 'kompos'
+                          ? 'bg-[#E9EDC9] text-[#1B3022] border-[#E9EDC9] shadow-lg'
+                          : 'bg-white/5 text-gray-400 hover:text-[#CCD5AE] border-white/10 hover:bg-white/10'
+                          }`}
                       >
                         <Scale className="w-5 h-5 sm:w-6 sm:h-6" />
                         <span className="font-bold text-[10px] sm:text-sm">Kompos Padat</span>
                       </button>
                       <button
                         onClick={() => setFertilizerType('poc')}
-                        className={`py-3 px-4 rounded-2xl flex flex-col items-center gap-2 transition-all border active:scale-95 ${
-                          fertilizerType === 'poc'
-                            ? 'bg-[#E9EDC9] text-[#1B3022] border-[#E9EDC9] shadow-lg'
-                            : 'bg-white/5 text-gray-400 hover:text-[#CCD5AE] border-white/10 hover:bg-white/10'
-                        }`}
+                        className={`py-3 px-4 rounded-2xl flex flex-col items-center gap-2 transition-all border active:scale-95 ${fertilizerType === 'poc'
+                          ? 'bg-[#E9EDC9] text-[#1B3022] border-[#E9EDC9] shadow-lg'
+                          : 'bg-white/5 text-gray-400 hover:text-[#CCD5AE] border-white/10 hover:bg-white/10'
+                          }`}
                       >
                         <Droplets className="w-5 h-5 sm:w-6 sm:h-6" />
                         <span className="font-bold text-[10px] sm:text-sm">POC (Cair)</span>
@@ -1487,7 +1481,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
 
                 <div className="flex flex-col justify-center space-y-4 pt-2 sm:pt-0">
                   <h3 className="text-base sm:text-lg font-bold text-[#E9EDC9] ml-1">Estimasi Kebutuhan</h3>
-                  
+
                   {landArea ? (
                     <div className="bg-[#E9EDC9]/5 rounded-2xl p-5 sm:p-6 border border-[#E9EDC9]/20 shadow-inner">
                       {fertilizerType === 'kompos' ? (
@@ -1537,7 +1531,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
         )}
 
         {view === 'cuaca' && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="space-y-8"
@@ -1555,7 +1549,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                   <CloudRain className="w-16 h-16 text-[#A3B18A] mx-auto mb-4 opacity-50" />
                   <h3 className="text-xl font-bold text-[#E9EDC9] mb-2">Periksa Cuaca Saat Ini</h3>
                   <p className="text-[#CCD5AE] mb-6">Kami memerlukan akses lokasi Anda untuk memberikan prakiraan cuaca yang akurat atau ketik nama kota Anda di bawah.</p>
-                  
+
                   <div className="max-w-md mx-auto space-y-4">
                     <button
                       onClick={fetchWeatherData}
@@ -1609,7 +1603,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="text-xl sm:text-2xl font-bold text-[#E9EDC9]">{weatherLocation}</h3>
-                          <button 
+                          <button
                             onClick={() => { setWeatherData(null); setWeatherAIAnalysis(null); }}
                             className="p-1 hover:bg-white/10 rounded-lg text-[#A3B18A] transition-all"
                             title="Ganti Lokasi"
@@ -1626,7 +1620,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                         <span className="text-xs font-bold uppercase tracking-widest text-[#CCD5AE]">Suhu Saat Ini</span>
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div className="bg-white/5 rounded-2xl p-4 border border-white/10 text-center">
                         <ThermometerSun className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
@@ -1669,40 +1663,40 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                       />
                     </div>
                     {weatherError && <p className="text-red-400 text-sm mb-4 relative z-10">{weatherError}</p>}
-                      <button
-                        onClick={handleWeatherAnalysis}
-                        disabled={isWeatherAILoading}
-                        className="w-full py-3 bg-[#E9EDC9] text-[#1B3022] font-bold rounded-xl hover:bg-white transition-colors relative z-10 flex justify-center items-center gap-2 shadow-lg disabled:opacity-75"
-                      >
-                        {isWeatherAILoading ? (
-                          <><Loader2 className="w-5 h-5 animate-spin" /> Menganalisis Dampak...</>
-                        ) : (
-                          <><Send className="w-4 h-4" /> Dapatkan Tindakan Preventif</>
-                        )}
-                      </button>
-                    </div>
-  
-                    {/* AI Response Display */}
-                    {weatherAIAnalysis && weatherAIAnalysis.kategori_respons === 'tindakan_cuaca' && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-5 sm:p-6 shadow-2xl mt-6"
-                      >
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white/5 p-4 rounded-xl border border-white/10 mb-6 gap-3">
-                          <div className="flex items-center gap-3">
-                             <span className="text-xs font-medium text-gray-300">Risiko:</span>
-                             {getSeverityBadge(weatherAIAnalysis.tingkat_risiko || '')}
-                          </div>
-                          <motion.button
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => addToReport(weatherAIAnalysis, 'cuaca')}
-                            className="w-full sm:w-auto p-2 bg-white/10 border border-white/20 rounded-xl text-[#E9EDC9] hover:bg-white/20 transition-all flex items-center justify-center gap-2 text-xs font-bold active:scale-95"
-                          >
-                            <Download className="w-4 h-4" />
-                            Simpan Laporan
-                          </motion.button>
+                    <button
+                      onClick={handleWeatherAnalysis}
+                      disabled={isWeatherAILoading}
+                      className="w-full py-3 bg-[#E9EDC9] text-[#1B3022] font-bold rounded-xl hover:bg-white transition-colors relative z-10 flex justify-center items-center gap-2 shadow-lg disabled:opacity-75"
+                    >
+                      {isWeatherAILoading ? (
+                        <><Loader2 className="w-5 h-5 animate-spin" /> Menganalisis Dampak...</>
+                      ) : (
+                        <><Send className="w-4 h-4" /> Dapatkan Tindakan Preventif</>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* AI Response Display */}
+                  {weatherAIAnalysis && weatherAIAnalysis.kategori_respons === 'tindakan_cuaca' && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-5 sm:p-6 shadow-2xl mt-6"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-white/5 p-4 rounded-xl border border-white/10 mb-6 gap-3">
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-medium text-gray-300">Risiko:</span>
+                          {getSeverityBadge(weatherAIAnalysis.tingkat_risiko || '')}
                         </div>
+                        <motion.button
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => addToReport(weatherAIAnalysis, 'cuaca')}
+                          className="w-full sm:w-auto p-2 bg-white/10 border border-white/20 rounded-xl text-[#E9EDC9] hover:bg-white/20 transition-all flex items-center justify-center gap-2 text-xs font-bold active:scale-95"
+                        >
+                          <Download className="w-4 h-4" />
+                          Simpan Laporan
+                        </motion.button>
+                      </div>
 
                       <div className="space-y-3">
                         <h4 className="text-xs font-bold uppercase text-[#A3B18A] tracking-widest flex items-center gap-2">
@@ -1735,7 +1729,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
         )}
 
         {view === 'laporan' && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="space-y-6 sm:space-y-8"
@@ -1770,7 +1764,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                         <span>{reportItems.length} Total Laporan</span>
                       </div>
                       <div className="flex gap-2">
-                         <button
+                        <button
                           onClick={exportToCSV}
                           className="flex-1 px-4 py-2 bg-white/10 border border-white/20 rounded-xl text-[#E9EDC9] hover:bg-white/20 transition-all flex items-center justify-center gap-2 text-[10px] sm:text-xs font-bold active:scale-95 min-h-[44px]"
                         >
@@ -1794,7 +1788,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         <div className="space-y-2">
                           <label className="text-[10px] font-bold text-gray-500 uppercase ml-1">Tipe Laporan</label>
-                          <select 
+                          <select
                             value={reportFilterType}
                             onChange={(e) => setReportFilterType(e.target.value)}
                             className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-[#F4F1DE] outline-none focus:ring-1 focus:ring-[#E9EDC9]/30 transition-all"
@@ -1808,7 +1802,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                         </div>
                         <div className="space-y-2">
                           <label className="text-[10px] font-bold text-gray-500 uppercase ml-1">Dari Tanggal</label>
-                          <input 
+                          <input
                             type="date"
                             value={reportStartDate}
                             onChange={(e) => setReportStartDate(e.target.value)}
@@ -1818,14 +1812,14 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                         <div className="space-y-2">
                           <label className="text-[10px] font-bold text-gray-500 uppercase ml-1">Sampai Tanggal</label>
                           <div className="relative">
-                            <input 
+                            <input
                               type="date"
                               value={reportEndDate}
                               onChange={(e) => setReportEndDate(e.target.value)}
                               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-[#F4F1DE] outline-none focus:ring-1 focus:ring-[#E9EDC9]/30 transition-all [color-scheme:dark]"
                             />
                             {(reportFilterType !== 'semua' || reportStartDate || reportEndDate) && (
-                              <button 
+                              <button
                                 onClick={() => {
                                   setReportFilterType('semua');
                                   setReportStartDate('');
@@ -1847,126 +1841,123 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                       .filter(item => {
                         // Type Filter
                         if (reportFilterType !== 'semua' && item.type !== reportFilterType) return false;
-                        
+
                         // Date filtering
                         // item.timestamp is like "8/5/2024, 10:30:00" or similar local format
                         // For basic robustness, we'll try to compare dates
                         const itemDateParts = item.timestamp.split(',')[0].split('/');
                         // Expected: [day, month, year] from id-ID
                         const itemDate = new Date(Number(itemDateParts[2]), Number(itemDateParts[1]) - 1, Number(itemDateParts[0]));
-                        
+
                         if (reportStartDate) {
                           const start = new Date(reportStartDate);
-                          start.setHours(0,0,0,0);
+                          start.setHours(0, 0, 0, 0);
                           if (itemDate < start) return false;
                         }
-                        
+
                         if (reportEndDate) {
                           const end = new Date(reportEndDate);
-                          end.setHours(23,59,59,999);
+                          end.setHours(23, 59, 59, 999);
                           if (itemDate > end) return false;
                         }
-                        
+
                         return true;
                       })
                       .map((item) => (
-                      <motion.div 
-                        layout
-                        whileHover={{ y: -8, scale: 1.01 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                        onClick={() => setSelectedReportItem(item)}
-                        key={item.id} 
-                        className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl overflow-hidden flex flex-col shadow-2xl group hover:border-white/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all duration-500 cursor-pointer"
-                      >
-                        {/* Card Header with Icon Background */}
-                        <div className={`relative h-24 flex items-center justify-center overflow-hidden ${
-                          item.type === 'diagnosis' ? 'bg-gradient-to-br from-green-500/20 to-emerald-900/40' :
-                          item.type === 'kalender' ? 'bg-gradient-to-br from-blue-500/20 to-indigo-900/40' :
-                          item.type === 'cuaca' ? 'bg-gradient-to-br from-yellow-500/20 to-orange-900/40' :
-                          'bg-gradient-to-br from-orange-500/20 to-amber-900/40'
-                        }`}>
-                          <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-                          
-                          <div className={`p-4 rounded-2xl border border-white/20 backdrop-blur-md shadow-xl z-10 ${
-                            item.type === 'diagnosis' ? 'text-green-400' :
-                            item.type === 'kalender' ? 'text-blue-400' :
-                            item.type === 'cuaca' ? 'text-yellow-400' :
-                            'text-orange-400'
-                          }`}>
-                            {item.type === 'diagnosis' && <Leaf className="w-8 h-8" />}
-                            {item.type === 'kalender' && <CalendarDays className="w-8 h-8" />}
-                            {item.type === 'cuaca' && <ThermometerSun className="w-8 h-8" />}
-                            {item.type === 'kalkulator' && <Scale className="w-8 h-8" />}
+                        <motion.div
+                          layout
+                          whileHover={{ y: -8, scale: 1.01 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                          onClick={() => setSelectedReportItem(item)}
+                          key={item.id}
+                          className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl overflow-hidden flex flex-col shadow-2xl group hover:border-white/40 hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all duration-500 cursor-pointer"
+                        >
+                          {/* Card Header with Icon Background */}
+                          <div className={`relative h-24 flex items-center justify-center overflow-hidden ${item.type === 'diagnosis' ? 'bg-gradient-to-br from-green-500/20 to-emerald-900/40' :
+                            item.type === 'kalender' ? 'bg-gradient-to-br from-blue-500/20 to-indigo-900/40' :
+                              item.type === 'cuaca' ? 'bg-gradient-to-br from-yellow-500/20 to-orange-900/40' :
+                                'bg-gradient-to-br from-orange-500/20 to-amber-900/40'
+                            }`}>
+                            <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+
+                            <div className={`p-4 rounded-2xl border border-white/20 backdrop-blur-md shadow-xl z-10 ${item.type === 'diagnosis' ? 'text-green-400' :
+                              item.type === 'kalender' ? 'text-blue-400' :
+                                item.type === 'cuaca' ? 'text-yellow-400' :
+                                  'text-orange-400'
+                              }`}>
+                              {item.type === 'diagnosis' && <Leaf className="w-8 h-8" />}
+                              {item.type === 'kalender' && <CalendarDays className="w-8 h-8" />}
+                              {item.type === 'cuaca' && <ThermometerSun className="w-8 h-8" />}
+                              {item.type === 'kalkulator' && <Scale className="w-8 h-8" />}
+                            </div>
+
+                            <div className="absolute top-4 right-4 z-20">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  removeItemFromReport(item.id);
+                                }}
+                                className="p-2 bg-black/20 hover:bg-red-500/40 text-white/60 hover:text-white rounded-xl transition-all backdrop-blur-sm border border-white/10"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                           </div>
 
-                          <div className="absolute top-4 right-4 z-20">
-                            <button 
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                removeItemFromReport(item.id);
-                              }}
-                              className="p-2 bg-black/20 hover:bg-red-500/40 text-white/60 hover:text-white rounded-xl transition-all backdrop-blur-sm border border-white/10"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
+                          <div className="p-6 flex-1 flex flex-col pt-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#A3B18A] leading-none">{item.type}</span>
+                              <span className="w-1 h-1 rounded-full bg-white/20"></span>
+                              <p className="text-[9px] text-gray-500 font-mono">{item.timestamp}</p>
+                            </div>
 
-                        <div className="p-6 flex-1 flex flex-col pt-4">
-                          <div className="flex items-center gap-2 mb-2">
-                             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#A3B18A] leading-none">{item.type}</span>
-                             <span className="w-1 h-1 rounded-full bg-white/20"></span>
-                             <p className="text-[9px] text-gray-500 font-mono">{item.timestamp}</p>
-                          </div>
+                            <h4 className="text-lg font-bold text-[#E9EDC9] leading-tight mb-3 group-hover:text-white transition-colors">
+                              {item.type === 'diagnosis' ? (item.data.diagnosis || 'Diagnosis Tanaman') :
+                                item.type === 'kalender' ? `Program ${item.data.tanaman}` :
+                                  item.type === 'kalkulator' ? 'Kalkulasi Nutrisi' :
+                                    'Analisis Cuaca'}
+                            </h4>
 
-                          <h4 className="text-lg font-bold text-[#E9EDC9] leading-tight mb-3 group-hover:text-white transition-colors">
-                            {item.type === 'diagnosis' ? (item.data.diagnosis || 'Diagnosis Tanaman') : 
-                             item.type === 'kalender' ? `Program ${item.data.tanaman}` : 
-                             item.type === 'kalkulator' ? 'Kalkulasi Nutrisi' :
-                             'Analisis Cuaca'}
-                          </h4>
-                          
-                          <div className="text-xs text-gray-400 line-clamp-3 mb-6 flex-1 leading-relaxed italic border-l border-white/10 pl-3">
-                            {item.type === 'diagnosis' ? item.data.penjelasan : 
-                             item.type === 'kalender' ? `${item.data.jadwal?.length} aktivitas pemeliharaan terjadwal.` : 
-                             item.type === 'kalkulator' ? `Dosis ${item.data.kebutuhan} untuk luas lahan ${item.data.luas} m².` : 
-                             item.data.analisis_singkat}
-                          </div>
+                            <div className="text-xs text-gray-400 line-clamp-3 mb-6 flex-1 leading-relaxed italic border-l border-white/10 pl-3">
+                              {item.type === 'diagnosis' ? item.data.penjelasan :
+                                item.type === 'kalender' ? `${item.data.jadwal?.length} aktivitas pemeliharaan terjadwal.` :
+                                  item.type === 'kalkulator' ? `Dosis ${item.data.kebutuhan} untuk luas lahan ${item.data.luas} m².` :
+                                    item.data.analisis_singkat}
+                            </div>
 
-                          <div className="pt-4 border-t border-white/5 flex items-center justify-between mt-auto">
-                             <div className="flex gap-2">
-                               {item.type === 'diagnosis' && item.data.tingkat_keparahan && (
-                                 <span className={`px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase border ${
-                                   item.data.tingkat_keparahan === 'Tinggi' ? 'bg-red-500/20 text-red-300 border-red-500/30' :
-                                   item.data.tingkat_keparahan === 'Sedang' ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' :
-                                   'bg-green-500/20 text-green-300 border-green-500/30'
-                                 }`}>
-                                   {item.data.tingkat_keparahan}
-                                 </span>
-                               )}
-                               {(item.type === 'cuaca' || item.type === 'diagnosis') && (
+                            <div className="pt-4 border-t border-white/5 flex items-center justify-between mt-auto">
+                              <div className="flex gap-2">
+                                {item.type === 'diagnosis' && item.data.tingkat_keparahan && (
+                                  <span className={`px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase border ${item.data.tingkat_keparahan === 'Tinggi' ? 'bg-red-500/20 text-red-300 border-red-500/30' :
+                                    item.data.tingkat_keparahan === 'Sedang' ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30' :
+                                      'bg-green-500/20 text-green-300 border-green-500/30'
+                                    }`}>
+                                    {item.data.tingkat_keparahan}
+                                  </span>
+                                )}
+                                {(item.type === 'cuaca' || item.type === 'diagnosis') && (
                                   <span className="px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase border bg-white/5 text-gray-400 border-white/10">
                                     AI Verified
                                   </span>
-                               )}
-                             </div>
-                             <div 
-                               onClick={() => setSelectedReportItem(item)}
-                               className="flex items-center gap-1 text-[10px] font-bold text-[#E9EDC9] group-hover:gap-2 transition-all cursor-pointer hover:text-white"
-                             >
-                               View <Send className="w-3 h-3" />
-                             </div>
+                                )}
+                              </div>
+                              <div
+                                onClick={() => setSelectedReportItem(item)}
+                                className="flex items-center gap-1 text-[10px] font-bold text-[#E9EDC9] group-hover:gap-2 transition-all cursor-pointer hover:text-white"
+                              >
+                                View <Send className="w-3 h-3" />
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </motion.div>
-                    ))}
+                        </motion.div>
+                      ))}
                   </div>
 
                   {/* Detail Report Modal */}
                   <AnimatePresence>
                     {selectedReportItem && (
                       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                        <motion.div 
+                        <motion.div
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
@@ -1980,19 +1971,17 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                           className="relative w-full max-w-2xl bg-[#1B3022] border border-white/20 rounded-3xl sm:rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]"
                         >
                           {/* Modal Header */}
-                          <div className={`p-5 sm:p-8 pb-4 flex justify-between items-start ${
-                            selectedReportItem.type === 'diagnosis' ? 'bg-gradient-to-b from-green-500/10 to-transparent' :
+                          <div className={`p-5 sm:p-8 pb-4 flex justify-between items-start ${selectedReportItem.type === 'diagnosis' ? 'bg-gradient-to-b from-green-500/10 to-transparent' :
                             selectedReportItem.type === 'kalender' ? 'bg-gradient-to-b from-blue-500/10 to-transparent' :
-                            selectedReportItem.type === 'cuaca' ? 'bg-gradient-to-b from-yellow-500/10 to-transparent' :
-                            'bg-gradient-to-b from-orange-500/10 to-transparent'
-                          }`}>
+                              selectedReportItem.type === 'cuaca' ? 'bg-gradient-to-b from-yellow-500/10 to-transparent' :
+                                'bg-gradient-to-b from-orange-500/10 to-transparent'
+                            }`}>
                             <div className="flex items-center gap-4">
-                              <div className={`p-4 rounded-2xl border border-white/10 ${
-                                selectedReportItem.type === 'diagnosis' ? 'bg-green-500/20 text-green-400' :
+                              <div className={`p-4 rounded-2xl border border-white/10 ${selectedReportItem.type === 'diagnosis' ? 'bg-green-500/20 text-green-400' :
                                 selectedReportItem.type === 'kalender' ? 'bg-blue-500/20 text-blue-400' :
-                                selectedReportItem.type === 'cuaca' ? 'bg-yellow-500/20 text-yellow-400' :
-                                'bg-orange-500/20 text-orange-400'
-                              }`}>
+                                  selectedReportItem.type === 'cuaca' ? 'bg-yellow-500/20 text-yellow-400' :
+                                    'bg-orange-500/20 text-orange-400'
+                                }`}>
                                 {selectedReportItem.type === 'diagnosis' && <Leaf className="w-6 h-6" />}
                                 {selectedReportItem.type === 'kalender' && <CalendarDays className="w-6 h-6" />}
                                 {selectedReportItem.type === 'cuaca' && <ThermometerSun className="w-6 h-6" />}
@@ -2001,14 +1990,14 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                               <div>
                                 <span className="text-xs font-bold uppercase tracking-widest text-[#A3B18A] block mb-1">{selectedReportItem.type}</span>
                                 <h3 className="text-2xl font-bold text-[#E9EDC9]">
-                                  {selectedReportItem.type === 'diagnosis' ? selectedReportItem.data.diagnosis : 
-                                   selectedReportItem.type === 'kalender' ? `Kalender ${selectedReportItem.data.tanaman}` :
-                                   selectedReportItem.type === 'kalkulator' ? 'Kalkulasi Pupuk' :
-                                   'Analisis Cuaca Lengkap'}
+                                  {selectedReportItem.type === 'diagnosis' ? selectedReportItem.data.diagnosis :
+                                    selectedReportItem.type === 'kalender' ? `Kalender ${selectedReportItem.data.tanaman}` :
+                                      selectedReportItem.type === 'kalkulator' ? 'Kalkulasi Pupuk' :
+                                        'Analisis Cuaca Lengkap'}
                                 </h3>
                               </div>
                             </div>
-                            <button 
+                            <button
                               onClick={() => setSelectedReportItem(null)}
                               className="p-2 bg-white/10 hover:bg-white/20 rounded-xl text-white/60 hover:text-white transition-all shadow-lg shadow-black/20"
                             >
@@ -2018,108 +2007,107 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
 
                           {/* Modal Body */}
                           <div className="p-8 pt-4 overflow-y-auto custom-scrollbar flex-1 space-y-8">
-                             <div className="flex items-center gap-2 text-xs text-gray-500 font-mono bg-black/20 self-start px-3 py-1 rounded-full border border-white/5">
-                                <CalendarDays className="w-3 h-3" />
-                                {selectedReportItem.timestamp}
-                             </div>
+                            <div className="flex items-center gap-2 text-xs text-gray-500 font-mono bg-black/20 self-start px-3 py-1 rounded-full border border-white/5">
+                              <CalendarDays className="w-3 h-3" />
+                              {selectedReportItem.timestamp}
+                            </div>
 
-                             {selectedReportItem.type === 'diagnosis' && (
-                               <div className="space-y-6">
-                                 <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                                   <label className="text-[10px] uppercase font-bold text-[#A3B18A] tracking-[0.2em] mb-4 block">Hasil Diagnosis & Penjelasan</label>
-                                   <p className="text-gray-200 leading-relaxed italic border-l-4 border-green-500/50 pl-6 text-lg">{selectedReportItem.data.penjelasan}</p>
-                                 </div>
-                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                   <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                                     <label className="text-[10px] uppercase font-bold text-[#A3B18A] tracking-[0.2em] mb-3 block">Rekomendasi Penanganan</label>
-                                     <p className="text-sm text-gray-300 leading-relaxed font-mono">{selectedReportItem.data.rekomendasi}</p>
-                                   </div>
-                                   <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                                     <label className="text-[10px] uppercase font-bold text-[#A3B18A] tracking-[0.2em] mb-3 block">Status Urgensi</label>
-                                     <div className="flex items-center gap-3">
-                                       <div className={`w-3 h-3 rounded-full animate-pulse ${
-                                         selectedReportItem.data.tingkat_keparahan === 'Tinggi' ? 'bg-red-500' : 'bg-yellow-500'
-                                       }`}></div>
-                                       <span className="text-xl font-bold text-white">{selectedReportItem.data.tingkat_keparahan}</span>
-                                     </div>
-                                     <p className="text-xs text-gray-400 mt-2">Segera lakukan tindakan pencegahan sesuai rekomendasi asisten AI.</p>
-                                   </div>
-                                 </div>
-                               </div>
-                             )}
-
-                             {selectedReportItem.type === 'kalender' && (
-                               <div className="space-y-6">
-                                  <div className="bg-white/5 border border-white/10 rounded-3xl p-8">
-                                    <h4 className="text-lg font-bold text-[#E9EDC9] mb-6 flex items-center gap-3">
-                                      <CalendarDays className="w-5 h-5 text-blue-400" />
-                                      Jadwal Perawatan Terpadu
-                                    </h4>
-                                    <div className="space-y-6">
-                                      {selectedReportItem.data.jadwal.map((step: any, idx: number) => (
-                                        <div key={idx} className="relative pl-10 border-l border-white/10 pb-6 last:pb-0">
-                                           <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-blue-500 border-4 border-[#1B3022] shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
-                                           <p className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-1">{step.waktu}</p>
-                                           <p className="text-sm text-gray-300 leading-relaxed">{step.aktivitas}</p>
-                                        </div>
-                                      ))}
+                            {selectedReportItem.type === 'diagnosis' && (
+                              <div className="space-y-6">
+                                <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                                  <label className="text-[10px] uppercase font-bold text-[#A3B18A] tracking-[0.2em] mb-4 block">Hasil Diagnosis & Penjelasan</label>
+                                  <p className="text-gray-200 leading-relaxed italic border-l-4 border-green-500/50 pl-6 text-lg">{selectedReportItem.data.penjelasan}</p>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                                    <label className="text-[10px] uppercase font-bold text-[#A3B18A] tracking-[0.2em] mb-3 block">Rekomendasi Penanganan</label>
+                                    <p className="text-sm text-gray-300 leading-relaxed font-mono">{selectedReportItem.data.rekomendasi}</p>
+                                  </div>
+                                  <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                                    <label className="text-[10px] uppercase font-bold text-[#A3B18A] tracking-[0.2em] mb-3 block">Status Urgensi</label>
+                                    <div className="flex items-center gap-3">
+                                      <div className={`w-3 h-3 rounded-full animate-pulse ${selectedReportItem.data.tingkat_keparahan === 'Tinggi' ? 'bg-red-500' : 'bg-yellow-500'
+                                        }`}></div>
+                                      <span className="text-xl font-bold text-white">{selectedReportItem.data.tingkat_keparahan}</span>
                                     </div>
+                                    <p className="text-xs text-gray-400 mt-2">Segera lakukan tindakan pencegahan sesuai rekomendasi asisten AI.</p>
                                   </div>
-                               </div>
-                             )}
+                                </div>
+                              </div>
+                            )}
 
-                             {selectedReportItem.type === 'cuaca' && (
-                               <div className="space-y-6">
-                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                     <div className="bg-white/5 border border-white/10 p-4 rounded-2xl text-center">
-                                        <ThermometerSun className="w-5 h-5 text-orange-400 mx-auto mb-2" />
-                                        <p className="text-[10px] text-gray-500 uppercase font-bold">Max Temp</p>
-                                        <p className="text-xl font-bold text-white">{selectedReportItem.data.suhu_max}°C</p>
-                                     </div>
-                                     <div className="bg-white/5 border border-white/10 p-4 rounded-2xl text-center">
-                                        <CloudRain className="w-5 h-5 text-blue-400 mx-auto mb-2" />
-                                        <p className="text-[10px] text-gray-500 uppercase font-bold">Hujan</p>
-                                        <p className="text-xl font-bold text-white">{selectedReportItem.data.curah_hujan} mm</p>
-                                     </div>
-                                     <div className="bg-white/5 border border-white/10 p-4 rounded-2xl text-center">
-                                        <Droplets className="w-5 h-5 text-teal-400 mx-auto mb-2" />
-                                        <p className="text-[10px] text-gray-500 uppercase font-bold">Kelembaban</p>
-                                        <p className="text-xl font-bold text-white">{selectedReportItem.data.kelembaban}%</p>
-                                     </div>
-                                     <div className="bg-white/5 border border-white/10 p-4 rounded-2xl text-center">
-                                        <Wind className="w-5 h-5 text-gray-400 mx-auto mb-2" />
-                                        <p className="text-[10px] text-gray-500 uppercase font-bold">Angin</p>
-                                        <p className="text-xl font-bold text-white">{selectedReportItem.data.angin} km/j</p>
-                                     </div>
+                            {selectedReportItem.type === 'kalender' && (
+                              <div className="space-y-6">
+                                <div className="bg-white/5 border border-white/10 rounded-3xl p-8">
+                                  <h4 className="text-lg font-bold text-[#E9EDC9] mb-6 flex items-center gap-3">
+                                    <CalendarDays className="w-5 h-5 text-blue-400" />
+                                    Jadwal Perawatan Terpadu
+                                  </h4>
+                                  <div className="space-y-6">
+                                    {selectedReportItem.data.jadwal.map((step: any, idx: number) => (
+                                      <div key={idx} className="relative pl-10 border-l border-white/10 pb-6 last:pb-0">
+                                        <div className="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-blue-500 border-4 border-[#1B3022] shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
+                                        <p className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-1">{step.waktu}</p>
+                                        <p className="text-sm text-gray-300 leading-relaxed">{step.aktivitas}</p>
+                                      </div>
+                                    ))}
                                   </div>
-                                  <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                                    <label className="text-[10px] uppercase font-bold text-[#A3B18A] tracking-[0.2em] mb-4 block">Analisis Cuaca Pertanian</label>
-                                    <p className="text-gray-300 leading-relaxed">{selectedReportItem.data.analisis_lengkap}</p>
-                                  </div>
-                               </div>
-                             )}
+                                </div>
+                              </div>
+                            )}
 
-                             {selectedReportItem.type === 'kalkulator' && (
-                               <div className="space-y-6">
-                                  <div className="bg-white/5 border border-white/10 rounded-3xl p-8 text-center space-y-4">
-                                     <div className="w-20 h-20 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto border border-orange-500/30">
-                                        <Scale className="w-10 h-10 text-orange-400" />
-                                     </div>
-                                     <div>
-                                        <p className="text-sm text-gray-400 uppercase font-bold tracking-widest">Kebutuhan Nutrisi Lahan</p>
-                                        <div className="flex items-center justify-center gap-2 mt-2">
-                                           <span className="text-5xl font-black text-[#E9EDC9]">{selectedReportItem.data.jumlah}</span>
-                                           <span className="text-xl font-bold text-[#A3B18A] uppercase">{selectedReportItem.data.satuan}</span>
-                                        </div>
-                                        <p className="text-xs text-gray-500 mt-2">Estimasi total {selectedReportItem.data.kebutuhan} untuk lahan {selectedReportItem.data.luas} m².</p>
-                                     </div>
+                            {selectedReportItem.type === 'cuaca' && (
+                              <div className="space-y-6">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                  <div className="bg-white/5 border border-white/10 p-4 rounded-2xl text-center">
+                                    <ThermometerSun className="w-5 h-5 text-orange-400 mx-auto mb-2" />
+                                    <p className="text-[10px] text-gray-500 uppercase font-bold">Max Temp</p>
+                                    <p className="text-xl font-bold text-white">{selectedReportItem.data.suhu_max}°C</p>
                                   </div>
-                                  <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                                    <label className="text-[10px] uppercase font-bold text-[#A3B18A] tracking-[0.2em] mb-3 block">Catatan Kalkulasi</label>
-                                    <p className="text-sm text-gray-300 leading-relaxed font-mono">Dihitung berdasarkan standar pemupukan organik berkelanjutan. Pastikan penyebaran merata pada seluruh area lahan.</p>
+                                  <div className="bg-white/5 border border-white/10 p-4 rounded-2xl text-center">
+                                    <CloudRain className="w-5 h-5 text-blue-400 mx-auto mb-2" />
+                                    <p className="text-[10px] text-gray-500 uppercase font-bold">Hujan</p>
+                                    <p className="text-xl font-bold text-white">{selectedReportItem.data.curah_hujan} mm</p>
                                   </div>
-                               </div>
-                             )}
+                                  <div className="bg-white/5 border border-white/10 p-4 rounded-2xl text-center">
+                                    <Droplets className="w-5 h-5 text-teal-400 mx-auto mb-2" />
+                                    <p className="text-[10px] text-gray-500 uppercase font-bold">Kelembaban</p>
+                                    <p className="text-xl font-bold text-white">{selectedReportItem.data.kelembaban}%</p>
+                                  </div>
+                                  <div className="bg-white/5 border border-white/10 p-4 rounded-2xl text-center">
+                                    <Wind className="w-5 h-5 text-gray-400 mx-auto mb-2" />
+                                    <p className="text-[10px] text-gray-500 uppercase font-bold">Angin</p>
+                                    <p className="text-xl font-bold text-white">{selectedReportItem.data.angin} km/j</p>
+                                  </div>
+                                </div>
+                                <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                                  <label className="text-[10px] uppercase font-bold text-[#A3B18A] tracking-[0.2em] mb-4 block">Analisis Cuaca Pertanian</label>
+                                  <p className="text-gray-300 leading-relaxed">{selectedReportItem.data.analisis_lengkap}</p>
+                                </div>
+                              </div>
+                            )}
+
+                            {selectedReportItem.type === 'kalkulator' && (
+                              <div className="space-y-6">
+                                <div className="bg-white/5 border border-white/10 rounded-3xl p-8 text-center space-y-4">
+                                  <div className="w-20 h-20 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto border border-orange-500/30">
+                                    <Scale className="w-10 h-10 text-orange-400" />
+                                  </div>
+                                  <div>
+                                    <p className="text-sm text-gray-400 uppercase font-bold tracking-widest">Kebutuhan Nutrisi Lahan</p>
+                                    <div className="flex items-center justify-center gap-2 mt-2">
+                                      <span className="text-5xl font-black text-[#E9EDC9]">{selectedReportItem.data.jumlah}</span>
+                                      <span className="text-xl font-bold text-[#A3B18A] uppercase">{selectedReportItem.data.satuan}</span>
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-2">Estimasi total {selectedReportItem.data.kebutuhan} untuk lahan {selectedReportItem.data.luas} m².</p>
+                                  </div>
+                                </div>
+                                <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                                  <label className="text-[10px] uppercase font-bold text-[#A3B18A] tracking-[0.2em] mb-3 block">Catatan Kalkulasi</label>
+                                  <p className="text-sm text-gray-300 leading-relaxed font-mono">Dihitung berdasarkan standar pemupukan organik berkelanjutan. Pastikan penyebaran merata pada seluruh area lahan.</p>
+                                </div>
+                              </div>
+                            )}
                           </div>
 
                           {/* Modal Footer */}
@@ -2174,7 +2162,7 @@ Mohon berikan Asisten Cuaca untuk memberitahu bagaimana pengaruhnya pada tanaman
                 <h4 className="text-[#E9EDC9] font-bold text-sm">Laporan Tersimpan!</h4>
                 <p className="text-gray-400 text-[11px] leading-tight">Berhasil ditambahkan ke menu Laporan Saya.</p>
               </div>
-              <motion.div 
+              <motion.div
                 className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,1)]"
                 animate={{ opacity: [0.4, 1, 0.4] }}
                 transition={{ duration: 1.5, repeat: Infinity }}
