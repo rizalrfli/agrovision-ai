@@ -56,6 +56,6 @@ Proyek ini telah dikonfigurasi untuk deploy otomatis ke GitHub Pages menggunakan
 1. Pergi ke repositori Anda di GitHub.
 2. Klik tab **Settings** > **Secrets and variables** > **Actions**.
 3. Klik **New repository secret**.
-4. Beri nama `GEMINI_API_KEY` dan masukkan key Anda (`AIzaSyDwd6Rz5tHtGyK1CSXrwa691ZQwDber8tk`) sebagai nilainya.
+4. Beri nama `GEMINI_API_KEY` dan masukkan key Anda (`[ENCRYPTION_KEY]`) sebagai nilainya.
 5. Setiap kali Anda melakukan `git push` ke branch `main`, aplikasi akan secara otomatis dibangun dan dideploy.
 
