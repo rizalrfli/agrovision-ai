@@ -13,6 +13,10 @@ import { PEST_DATABASE } from './data';
 const initializeGemini = () => {
   try {
     const key = process.env.GEMINI_API_KEY;
+    if (!key) {
+      console.error("GEMINI_API_KEY is missing! Please add it to your .env file or GitHub Secrets.");
+      return null;
+    }
     return new GoogleGenAI({ apiKey: key });
   } catch (error) {
     console.error("Failed to initialize Gemini:", error);
